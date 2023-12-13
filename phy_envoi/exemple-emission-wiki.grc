@@ -50,18 +50,6 @@ blocks:
     coordinate: [16, 268.0]
     rotation: 0
     state: true
-- name: excess_bw
-  id: variable
-  parameters:
-    comment: ''
-    value: '0.35'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [352, 20.0]
-    rotation: 0
-    state: enabled
 - name: freq_centr
   id: variable
   parameters:
@@ -74,11 +62,53 @@ blocks:
     coordinate: [636, 18]
     rotation: 0
     state: true
+- name: gain
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: ''
+    min_len: '200'
+    orient: Qt.Horizontal
+    rangeType: float
+    start: '0'
+    step: '10'
+    stop: '100'
+    value: '30'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [341, 414]
+    rotation: 0
+    state: true
+- name: loop_bw
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: ''
+    min_len: '200'
+    orient: Qt.Horizontal
+    rangeType: float
+    start: '0'
+    step: '0.1'
+    stop: '1'
+    value: '0.5'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [126, 377]
+    rotation: 0
+    state: true
 - name: rrc_taps
   id: variable
   parameters:
     comment: ''
-    value: firdes.root_raised_cosine(1, sps, 1, excess_bw, 45)
+    value: firdes.root_raised_cosine(1, sps, 1, loop_bw, 45)
   states:
     bus_sink: false
     bus_source: false
@@ -90,7 +120,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '16000'
+    value: '32000'
   states:
     bus_sink: false
     bus_source: false
@@ -102,7 +132,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '4'
+    value: '2'
   states:
     bus_sink: false
     bus_source: false
@@ -157,7 +187,7 @@ blocks:
     comment: ''
     constellation: bpsk
     differential: 'True'
-    excess_bw: excess_bw
+    excess_bw: loop_bw
     log: 'False'
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -186,7 +216,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [408, 276.0]
+    coordinate: [492, 257]
     rotation: 0
     state: true
 - name: qtgui_const_sink_x_0
@@ -360,7 +390,7 @@ blocks:
     bus_structure: null
     coordinate: [1177, 172]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_time_sink_x_0
   id: qtgui_time_sink_x
   parameters:
@@ -457,7 +487,7 @@ blocks:
     bus_structure: null
     coordinate: [898, 264]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: uhd_usrp_sink_0
   id: uhd_usrp_sink
   parameters:
@@ -571,7 +601,7 @@ blocks:
     comment: ''
     dev_addr: '""'
     dev_args: '""'
-    gain0: '100'
+    gain0: gain
     gain1: '0'
     gain10: '0'
     gain11: '0'
@@ -731,7 +761,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1093, 3]
+    coordinate: [1039, 13]
     rotation: 0
     state: true
 
@@ -741,11 +771,11 @@ connections:
 - [blocks_throttle_0, '0', qtgui_const_sink_x_0, '0']
 - [blocks_throttle_0, '0', qtgui_freq_sink_x_0, '0']
 - [blocks_throttle_0, '0', qtgui_time_sink_x_0, '0']
-- [blocks_throttle_0, '0', uhd_usrp_sink_0, '0']
 - [digital_constellation_modulator_0, '0', blocks_throttle_0, '0']
 - [fir_filter_xxx_0, '0', qtgui_const_sink_x_0, '1']
 - [fir_filter_xxx_0, '0', qtgui_freq_sink_x_0, '1']
 - [fir_filter_xxx_0, '0', qtgui_time_sink_x_0, '1']
+- [fir_filter_xxx_0, '0', uhd_usrp_sink_0, '0']
 
 metadata:
   file_format: 1
