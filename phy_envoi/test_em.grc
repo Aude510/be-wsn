@@ -257,7 +257,7 @@ blocks:
     alias: ''
     append: 'True'
     comment: ''
-    file: /home/aude/be-wsn/debug/header_em
+    file: /home/aude/be-wsn/debug/oskour
     type: byte
     unbuffered: 'False'
     vlen: '1'
@@ -265,7 +265,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1608, 548.0]
+    coordinate: [1722, 416]
     rotation: 0
     state: enabled
 - name: blocks_file_source_0
@@ -307,7 +307,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1391, 480]
+    coordinate: [1464, 462]
     rotation: 0
     state: true
 - name: blocks_repack_bits_bb_1
@@ -367,7 +367,7 @@ blocks:
     bus_structure: null
     coordinate: [1642, 633]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_tagged_stream_mux_0
   id: blocks_tagged_stream_mux
   parameters:
@@ -443,9 +443,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [704, 692.0]
+    coordinate: [668, 767]
     rotation: 0
-    state: true
+    state: disabled
 - name: digital_packet_headergenerator_bb_0
   id: digital_packet_headergenerator_bb
   parameters:
@@ -1107,7 +1107,9 @@ connections:
 - [blocks_repack_bits_bb_0, '0', blocks_file_sink_0_0, '0']
 - [blocks_repack_bits_bb_0, '0', blocks_tag_debug_0, '0']
 - [blocks_repack_bits_bb_1, '0', virtual_sink_0, '0']
+- [blocks_stream_to_tagged_stream_0, '0', blocks_repack_bits_bb_1, '0']
 - [blocks_stream_to_tagged_stream_0, '0', digital_crc32_bb_0, '0']
+- [blocks_stream_to_tagged_stream_0, '0', digital_packet_headergenerator_bb_0, '0']
 - [blocks_tagged_stream_mux_0, '0', blocks_repack_bits_bb_0, '0']
 - [blocks_throttle_0, '0', fir_filter_xxx_0, '0']
 - [blocks_throttle_0, '0', qtgui_const_sink_x_0, '0']

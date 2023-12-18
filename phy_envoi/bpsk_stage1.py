@@ -31,7 +31,6 @@ from PyQt5 import Qt
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
-from gnuradio.qtgui import Range, RangeWidget
 from gnuradio import qtgui
 
 class bpsk_stage1(gr.top_block, Qt.QWidget):
@@ -71,36 +70,18 @@ class bpsk_stage1(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.sps = sps = 2
-        self.payload_mod = payload_mod = digital.constellation_qpsk()
-        self.occupied_carriers = occupied_carriers = (list(range(-26, -21)) + list(range(-20, -7)) + list(range(-6, 0)) + list(range(1, 7)) + list(range(8, 21)) + list(range(22, 27)),)
-        self.loop_bw = loop_bw = 0.35
-        self.length_tag_key = length_tag_key = "packet_len"
-        self.header_mod = header_mod = digital.constellation_bpsk()
         self.samp_rate = samp_rate = 1500000
-        self.rrc_taps = rrc_taps = firdes.root_raised_cosine(1, sps, 1, loop_bw, 45)
-        self.qpsk = qpsk = digital.constellation_qpsk().base()
-        self.header_formatter = header_formatter = digital.packet_header_ofdm(occupied_carriers, n_syms=1, len_tag_key=length_tag_key, frame_len_tag_key=length_tag_key, bits_per_header_sym=header_mod.bits_per_symbol(), bits_per_payload_sym=payload_mod.bits_per_symbol(), scramble_header=False)
-        self.gain = gain = 30
         self.freq_centr = freq_centr = 863200000
-        self.bpsk = bpsk = digital.constellation_bpsk().base()
 
         ##################################################
         # Blocks
         ##################################################
-        self._loop_bw_range = Range(0, 1, 0.1, 0.35, 200)
-        self._loop_bw_win = RangeWidget(self._loop_bw_range, self.set_loop_bw, 'loop_bw', "counter_slider", float)
-        self.top_grid_layout.addWidget(self._loop_bw_win)
-        self.digital_packet_headergenerator_bb_0 = digital.packet_headergenerator_bb(header_formatter.base(), length_tag_key)
-        self.digital_crc32_bb_0 = digital.crc32_bb(False, "packet_len", True)
+        self.digital_packet_headergenerator_bb_default_0 = digital.packet_headergenerator_bb(3, "packet_len")
         self.blocks_tagged_stream_mux_0 = blocks.tagged_stream_mux(gr.sizeof_char*1, "packet_len", 0)
-        self.blocks_tag_debug_0 = blocks.tag_debug(gr.sizeof_char*1, '', "")
-        self.blocks_tag_debug_0.set_display(True)
         self.blocks_stream_to_tagged_stream_0 = blocks.stream_to_tagged_stream(gr.sizeof_char, 1, 32, "packet_len")
-        self.blocks_repack_bits_bb_1 = blocks.repack_bits_bb(1, 8, "", False, gr.GR_LSB_FIRST)
-        self.blocks_repack_bits_bb_0 = blocks.repack_bits_bb(1, 8, "", False, gr.GR_LSB_FIRST)
         self.blocks_file_source_0 = blocks.file_source(gr.sizeof_char*1, '/home/aude/be-wsn/debug/envoi', True, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
-        self.blocks_file_sink_0_0 = blocks.file_sink(gr.sizeof_char*1, '/home/aude/be-wsn/debug/header_em', True)
+        self.blocks_file_sink_0_0 = blocks.file_sink(gr.sizeof_char*1, '/home/aude/be-wsn/debug/oskour', True)
         self.blocks_file_sink_0_0.set_unbuffered(False)
 
 
@@ -109,14 +90,10 @@ class bpsk_stage1(gr.top_block, Qt.QWidget):
         # Connections
         ##################################################
         self.connect((self.blocks_file_source_0, 0), (self.blocks_stream_to_tagged_stream_0, 0))
-        self.connect((self.blocks_repack_bits_bb_0, 0), (self.blocks_file_sink_0_0, 0))
-        self.connect((self.blocks_repack_bits_bb_0, 0), (self.blocks_tag_debug_0, 0))
-        self.connect((self.blocks_repack_bits_bb_1, 0), (self.blocks_tagged_stream_mux_0, 1))
-        self.connect((self.blocks_stream_to_tagged_stream_0, 0), (self.digital_crc32_bb_0, 0))
-        self.connect((self.blocks_tagged_stream_mux_0, 0), (self.blocks_repack_bits_bb_0, 0))
-        self.connect((self.digital_crc32_bb_0, 0), (self.blocks_repack_bits_bb_1, 0))
-        self.connect((self.digital_crc32_bb_0, 0), (self.digital_packet_headergenerator_bb_0, 0))
-        self.connect((self.digital_packet_headergenerator_bb_0, 0), (self.blocks_tagged_stream_mux_0, 0))
+        self.connect((self.blocks_stream_to_tagged_stream_0, 0), (self.blocks_tagged_stream_mux_0, 1))
+        self.connect((self.blocks_stream_to_tagged_stream_0, 0), (self.digital_packet_headergenerator_bb_default_0, 0))
+        self.connect((self.blocks_tagged_stream_mux_0, 0), (self.blocks_file_sink_0_0, 0))
+        self.connect((self.digital_packet_headergenerator_bb_default_0, 0), (self.blocks_tagged_stream_mux_0, 0))
 
     def closeEvent(self, event):
         self.settings = Qt.QSettings("GNU Radio", "bpsk_stage1")
@@ -128,40 +105,6 @@ class bpsk_stage1(gr.top_block, Qt.QWidget):
 
     def set_sps(self, sps):
         self.sps = sps
-        self.set_rrc_taps(firdes.root_raised_cosine(1, self.sps, 1, self.loop_bw, 45))
-
-    def get_payload_mod(self):
-        return self.payload_mod
-
-    def set_payload_mod(self, payload_mod):
-        self.payload_mod = payload_mod
-
-    def get_occupied_carriers(self):
-        return self.occupied_carriers
-
-    def set_occupied_carriers(self, occupied_carriers):
-        self.occupied_carriers = occupied_carriers
-        self.set_header_formatter(digital.packet_header_ofdm(self.occupied_carriers, n_syms=1, len_tag_key=self.length_tag_key, frame_len_tag_key=self.length_tag_key, bits_per_header_sym=header_mod.bits_per_symbol(), bits_per_payload_sym=payload_mod.bits_per_symbol(), scramble_header=False))
-
-    def get_loop_bw(self):
-        return self.loop_bw
-
-    def set_loop_bw(self, loop_bw):
-        self.loop_bw = loop_bw
-        self.set_rrc_taps(firdes.root_raised_cosine(1, self.sps, 1, self.loop_bw, 45))
-
-    def get_length_tag_key(self):
-        return self.length_tag_key
-
-    def set_length_tag_key(self, length_tag_key):
-        self.length_tag_key = length_tag_key
-        self.set_header_formatter(digital.packet_header_ofdm(self.occupied_carriers, n_syms=1, len_tag_key=self.length_tag_key, frame_len_tag_key=self.length_tag_key, bits_per_header_sym=header_mod.bits_per_symbol(), bits_per_payload_sym=payload_mod.bits_per_symbol(), scramble_header=False))
-
-    def get_header_mod(self):
-        return self.header_mod
-
-    def set_header_mod(self, header_mod):
-        self.header_mod = header_mod
 
     def get_samp_rate(self):
         return self.samp_rate
@@ -169,41 +112,11 @@ class bpsk_stage1(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
 
-    def get_rrc_taps(self):
-        return self.rrc_taps
-
-    def set_rrc_taps(self, rrc_taps):
-        self.rrc_taps = rrc_taps
-
-    def get_qpsk(self):
-        return self.qpsk
-
-    def set_qpsk(self, qpsk):
-        self.qpsk = qpsk
-
-    def get_header_formatter(self):
-        return self.header_formatter
-
-    def set_header_formatter(self, header_formatter):
-        self.header_formatter = header_formatter
-
-    def get_gain(self):
-        return self.gain
-
-    def set_gain(self, gain):
-        self.gain = gain
-
     def get_freq_centr(self):
         return self.freq_centr
 
     def set_freq_centr(self, freq_centr):
         self.freq_centr = freq_centr
-
-    def get_bpsk(self):
-        return self.bpsk
-
-    def set_bpsk(self, bpsk):
-        self.bpsk = bpsk
 
 
 
