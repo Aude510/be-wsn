@@ -1,4 +1,4 @@
-from gateway.pub import SendLink
+from pub import SendLink
 import time
 
 link = SendLink("5556")
