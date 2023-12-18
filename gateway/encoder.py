@@ -5,9 +5,9 @@ import struct
 # Preamble | Code  |  Seq  | @dst  | @src  |  Data  |  CRC
 #  1byte   | 1byte | 1byte | 1byte | 1byte | 4bytes | 1byte
 class Encoder:
-  def __init__(self, seq: int, dst: int, src: int, data, is_ack = False):
+  def __init__(self, seq: int, dst: int, src: int, value, is_ack = False):
     calculator = Calculator(Crc8.CCITT)
-    code = 0 if is_ack else ord('f') if type(data) == float else ord('i')
+    code = 0 if is_ack else ord('f') if type(value) == float else ord('i')
     self.data = bytearray(10 if code != 0 else 6)
     self.data[0] = 0
     self.data[1] = code
@@ -15,7 +15,7 @@ class Encoder:
     self.data[3] = dst
     self.data[4] = src
     if code != 0:
-      self.data[5:9] = struct.pack(chr(code), data)
+      self.data[5:9] = struct.pack(chr(code), value)
       self.data[9] = calculator.checksum(self.data[0:9])
     else:
       self.data[5] = calculator.checksum(self.data[0:5])
