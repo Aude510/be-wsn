@@ -14,8 +14,8 @@ class Encapsulator:
   def encapsulate_data(self, dst, code, data):
     return self.encapsulate(dst, code, data, -1)
   
-  def encapsulate_ack(self, dst, code, sequence):
-    return self.encapsulate(dst, code, 0, sequence)
+  def encapsulate_ack(self, dst, sequence):
+    return self.encapsulate(dst, CODE_ACK, 0, sequence)
     
   def encapsulate(self, dst, code, data, sequence):
     '''
