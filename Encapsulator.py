@@ -3,21 +3,27 @@ from constantsMAC import *
 
 class Encapsulator:
 
-  def __init__(self, addr_src):
+  def __init__(self, src):
     # Sequence number
     self.sequence = 0x00
     # Calculator for computing CRC
     self.calculator = Calculator(Crc8.CCITT, optimized=True)
     # MAC address of device (source)
-    self.addr_src = addr_src
+    self.src = src
     
-  def encapsulate(self, addr_dst, code, data = 0, sequence = -1):
+  def encapsulate_data(self, dst, code, data):
+    return self.encapsulate(dst, code, data, -1)
+  
+  def encapsulate_ack(self, dst, code, sequence):
+    return self.encapsulate(dst, code, 0, sequence)
+    
+  def encapsulate(self, dst, code, data, sequence):
     '''
     Returns an encapsulated message.
 
             Parameters:
 
-                    addr_dst (byte):      The address of the device that must receive the message.
+                    dst (byte):      The address of the device that must receive the message.
                     code (byte): Indicate the type of data sent(CODE_ACK, CODE_DATA_INT, CODE_DATA_FLOAT).
                     data (int/float): Data to be transmitted.
                     sequence (byte): Optional sequence number, used by gateways to send ACKs.
@@ -36,9 +42,9 @@ class Encapsulator:
     else:
       msg += chr(sequence)
     # Destination Address
-    msg += chr(addr_dst)
+    msg += chr(dst)
     # Source Address
-    msg += chr(self.addr_src)
+    msg += chr(self.src)
 
     if code != CODE_ACK:
       # Message
