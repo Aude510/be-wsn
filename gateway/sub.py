@@ -7,5 +7,5 @@ class RecvLink:
     self.socket.connect("tcp://localhost:%s" % port)
 
   def receive(self):
-    string = self.socket.recv_string()
-    return string.split()
+    packet = self.socket.recv()
+    return packet
