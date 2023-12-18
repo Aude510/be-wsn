@@ -1,15 +1,11 @@
 import zmq
 
-port = "5556"
+class RecvLink:
+  def __init__(self, port):
+    self.context = zmq.Context()
+    self.socket = self.context.socket(zmq.SUB)
+    self.socket.connect("tcp://localhost:%s" % port)
 
-# Socket to talk to server
-context = zmq.Context()
-socket = context.socket(zmq.SUB)
-socket.connect("tcp://localhost:%s" % port)
-
-socket.setsockopt_string(zmq.SUBSCRIBE, "")
-
-while True:
-  string = socket.recv_string()
-  topic, messagedata = string.split()
-  print(topic, '-', messagedata)
+  def receive(self):
+    string = self.socket.recv_string()
+    return string.split()
