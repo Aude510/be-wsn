@@ -69,6 +69,7 @@ class bpsk_stage1(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
+        self.variable_header_format_default_0 = variable_header_format_default_0 = digital.header_format_default(digital.packet_utils.default_access_code,0, 1)
         self.sps = sps = 2
         self.samp_rate = samp_rate = 1500000
         self.freq_centr = freq_centr = 863200000
@@ -76,11 +77,26 @@ class bpsk_stage1(gr.top_block, Qt.QWidget):
         ##################################################
         # Blocks
         ##################################################
+        self.digital_protocol_parser_b_0 = digital.protocol_parser_b("variable_header_format_default_0")
         self.digital_packet_headergenerator_bb_default_0 = digital.packet_headergenerator_bb(3, "packet_len")
+        self.digital_header_payload_demux_0 = digital.header_payload_demux(
+            ,
+            ,
+            0,
+            "frame_len",
+            "",
+            True,
+            gr.sizeof_char,
+            "rx_time",
+            samp_rate,
+            (,),
+            0)
         self.blocks_tagged_stream_mux_0 = blocks.tagged_stream_mux(gr.sizeof_char*1, "packet_len", 0)
         self.blocks_stream_to_tagged_stream_0 = blocks.stream_to_tagged_stream(gr.sizeof_char, 1, 32, "packet_len")
         self.blocks_file_source_0 = blocks.file_source(gr.sizeof_char*1, '/home/aude/be-wsn/debug/envoi', True, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
+        self.blocks_file_sink_0_0_0 = blocks.file_sink(gr.sizeof_char*1, '/home/aude/be-wsn/debug/oskour_head', True)
+        self.blocks_file_sink_0_0_0.set_unbuffered(False)
         self.blocks_file_sink_0_0 = blocks.file_sink(gr.sizeof_char*1, '/home/aude/be-wsn/debug/oskour', True)
         self.blocks_file_sink_0_0.set_unbuffered(False)
 
@@ -89,16 +105,26 @@ class bpsk_stage1(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
+        self.msg_connect((self.digital_protocol_parser_b_0, 'info'), (self.digital_header_payload_demux_0, 'header_data'))
         self.connect((self.blocks_file_source_0, 0), (self.blocks_stream_to_tagged_stream_0, 0))
         self.connect((self.blocks_stream_to_tagged_stream_0, 0), (self.blocks_tagged_stream_mux_0, 1))
         self.connect((self.blocks_stream_to_tagged_stream_0, 0), (self.digital_packet_headergenerator_bb_default_0, 0))
-        self.connect((self.blocks_tagged_stream_mux_0, 0), (self.blocks_file_sink_0_0, 0))
+        self.connect((self.blocks_tagged_stream_mux_0, 0), (self.digital_header_payload_demux_0, 0))
+        self.connect((self.blocks_tagged_stream_mux_0, 0), (self.digital_protocol_parser_b_0, 0))
+        self.connect((self.digital_header_payload_demux_0, 1), (self.blocks_file_sink_0_0, 0))
+        self.connect((self.digital_header_payload_demux_0, 0), (self.blocks_file_sink_0_0_0, 0))
         self.connect((self.digital_packet_headergenerator_bb_default_0, 0), (self.blocks_tagged_stream_mux_0, 0))
 
     def closeEvent(self, event):
         self.settings = Qt.QSettings("GNU Radio", "bpsk_stage1")
         self.settings.setValue("geometry", self.saveGeometry())
         event.accept()
+
+    def get_variable_header_format_default_0(self):
+        return self.variable_header_format_default_0
+
+    def set_variable_header_format_default_0(self, variable_header_format_default_0):
+        self.variable_header_format_default_0 = variable_header_format_default_0
 
     def get_sps(self):
         return self.sps

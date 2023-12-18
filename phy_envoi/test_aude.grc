@@ -68,6 +68,20 @@ blocks:
     coordinate: [280, 20.0]
     rotation: 0
     state: enabled
+- name: variable_header_format_default_0
+  id: variable_header_format_default
+  parameters:
+    access_code: '0'
+    bps: '1'
+    comment: ''
+    threshold: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [290, 795]
+    rotation: 0
+    state: true
 - name: blocks_file_sink_0_0
   id: blocks_file_sink
   parameters:
@@ -83,7 +97,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1711, 555]
+    coordinate: [1404, 562]
     rotation: 0
     state: enabled
 - name: blocks_file_sink_0_0_0
@@ -101,9 +115,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1521, 426]
+    coordinate: [1321, 454]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_file_source_0
   id: blocks_file_source
   parameters:
@@ -162,9 +176,35 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1163, 531]
+    coordinate: [461, 568]
     rotation: 0
     state: enabled
+- name: digital_header_payload_demux_0
+  id: digital_header_payload_demux
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    guard_interval: '0'
+    header_len: ''
+    header_padding: '0'
+    items_per_symbol: ''
+    length_tag_key: '"frame_len"'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    output_symbols: 'True'
+    samp_rate: samp_rate
+    special_tags: (,)
+    timing_tag_key: '"rx_time"'
+    trigger_tag_key: '""'
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [856, 519]
+    rotation: 0
+    state: true
 - name: digital_packet_headergenerator_bb_default_0
   id: digital_packet_headergenerator_bb_default
   parameters:
@@ -180,6 +220,22 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [956, 346]
+    rotation: 0
+    state: enabled
+- name: digital_protocol_parser_b_0
+  id: digital_protocol_parser_b
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    format: '"variable_header_format_default_0"'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [575, 778]
     rotation: 0
     state: enabled
 - name: virtual_sink_0
@@ -218,7 +274,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [915, 579]
+    coordinate: [213, 616]
     rotation: 0
     state: enabled
 - name: virtual_source_1
@@ -231,7 +287,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [915, 499]
+    coordinate: [213, 536]
     rotation: 0
     state: enabled
 
@@ -240,9 +296,12 @@ connections:
 - [blocks_stream_to_tagged_stream_0, '0', digital_packet_headergenerator_bb_default_0,
   '0']
 - [blocks_stream_to_tagged_stream_0, '0', virtual_sink_0, '0']
-- [blocks_tagged_stream_mux_0, '0', blocks_file_sink_0_0, '0']
-- [blocks_tagged_stream_mux_0, '0', blocks_file_sink_0_0_0, '0']
+- [blocks_tagged_stream_mux_0, '0', digital_header_payload_demux_0, '0']
+- [blocks_tagged_stream_mux_0, '0', digital_protocol_parser_b_0, '0']
+- [digital_header_payload_demux_0, '0', blocks_file_sink_0_0_0, '0']
+- [digital_header_payload_demux_0, '1', blocks_file_sink_0_0, '0']
 - [digital_packet_headergenerator_bb_default_0, '0', virtual_sink_0_0, '0']
+- [digital_protocol_parser_b_0, info, digital_header_payload_demux_0, header_data]
 - [virtual_source_0, '0', blocks_tagged_stream_mux_0, '1']
 - [virtual_source_1, '0', blocks_tagged_stream_mux_0, '0']
 
