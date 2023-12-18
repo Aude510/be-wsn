@@ -68,4 +68,5 @@ def isInt(msg):
         return False
     
 if __name__ == "__main__":
+    addr_node = input("Quelle est l'adresse du device ?")
     init_threads()
