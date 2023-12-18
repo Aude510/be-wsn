@@ -1,7 +1,6 @@
 import threading
 import zmq_links
 import queue
-import Encapsulator
 import constantsMAC
 import encoder
 import decoder
