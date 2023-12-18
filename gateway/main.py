@@ -35,10 +35,12 @@ def thread_decode():
                 continue
             if(sequence[packet.src_addr()]==packet.seq()):
                 sequence[packet.src_addr()]+=1
-                pass
+                print("La valeur dans le paquet est : " + str(packet.value()))
                 ## TODO : faire un call API
             elif(packet.dst_addr== constantsMAC.ADDR_GATEWAY and sequence[packet.src_addr()]<packet.seq()):
                 sequence[packet.src_addr()] = packet.seq()
+                print("Numéro de séquence de futur")
+                print("La valeur dans le paquet est : " + str(packet.value()))
                 ## TODO faire aussi un call API
             ack = encoder.Encoder(packet.seq(),packet.src_addr(),packet.dst_addr(),None,True)
             send_link.send(ack)                
