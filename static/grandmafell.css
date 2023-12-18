@@ -1,0 +1,38 @@
+body{background-color: #36393e}
+.grandma-card {
+    height: 350px;
+    background-color: aquamarine;
+    width: 350px;
+    border-radius: 10px;
+    box-shadow: black;
+    background-image: url("122430308-slipped-on-banana-peel-old-woman-cartoon-granny-vector-illustration.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); /* Adjust the shadow color to be bright */
+    margin-top: 50px;
+}
+
+.card-text{
+    color: #f0f0f0;
+    font-size : 20px;
+    font-family: 'Open Sans', sans-serif;
+}
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.gap-1 {
+    gap: 1rem;
+}
