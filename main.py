@@ -10,7 +10,7 @@ def init_threads():
 def thread_reception():
     return
 
-def thred_envoie():
+def thred_envoi():
     return
 
 
