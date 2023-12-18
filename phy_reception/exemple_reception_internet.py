@@ -24,7 +24,6 @@ from PyQt5 import Qt
 from gnuradio import qtgui
 import sip
 from gnuradio import digital
-from gnuradio import filter
 from gnuradio import gr
 from gnuradio.filter import firdes
 import sys
@@ -73,25 +72,21 @@ class exemple_reception_internet(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.sps = sps = 2
-        self.samp_rate = samp_rate = 1000000
-        self.loop_bw = loop_bw = 0.5
+        self.sps = sps = 8
+        self.samp_rate = samp_rate = 1500000
+        self.qpsk = qpsk = digital.constellation_qpsk().base()
+        self.loop_bw = loop_bw = 0.35
         self.gain = gain = 30
-        self.freq_centr = freq_centr = 0
+        self.freq_centr = freq_centr = 863200000
         self.damping_factor = damping_factor = 0.5
+        self.bpsk = bpsk = digital.constellation_bpsk().base()
 
         ##################################################
         # Blocks
         ##################################################
-        self._loop_bw_range = Range(0, 1, 0.1, 0.5, 200)
+        self._loop_bw_range = Range(0, 1, 0.1, 0.35, 200)
         self._loop_bw_win = RangeWidget(self._loop_bw_range, self.set_loop_bw, 'loop_bw', "counter_slider", float)
         self.top_grid_layout.addWidget(self._loop_bw_win)
-        self._gain_range = Range(0, 100, 10, 30, 200)
-        self._gain_win = RangeWidget(self._gain_range, self.set_gain, 'gain', "counter_slider", float)
-        self.top_grid_layout.addWidget(self._gain_win)
-        self._damping_factor_range = Range(0, 1, 0.1, 0.5, 200)
-        self._damping_factor_win = RangeWidget(self._damping_factor_range, self.set_damping_factor, 'damping_factor', "counter_slider", float)
-        self.top_grid_layout.addWidget(self._damping_factor_win)
         self.uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(("", "")),
             uhd.stream_args(
@@ -105,10 +100,50 @@ class exemple_reception_internet(gr.top_block, Qt.QWidget):
         self.uhd_usrp_source_0.set_antenna('TX/RX', 0)
         self.uhd_usrp_source_0.set_samp_rate(samp_rate)
         self.uhd_usrp_source_0.set_time_unknown_pps(uhd.time_spec())
+        self.qtgui_const_sink_x_2_0_0 = qtgui.const_sink_c(
+            1024, #size
+            "cma output", #name
+            1 #number of inputs
+        )
+        self.qtgui_const_sink_x_2_0_0.set_update_time(0.10)
+        self.qtgui_const_sink_x_2_0_0.set_y_axis(-2, 2)
+        self.qtgui_const_sink_x_2_0_0.set_x_axis(-2, 2)
+        self.qtgui_const_sink_x_2_0_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, "")
+        self.qtgui_const_sink_x_2_0_0.enable_autoscale(False)
+        self.qtgui_const_sink_x_2_0_0.enable_grid(False)
+        self.qtgui_const_sink_x_2_0_0.enable_axis_labels(True)
+
+
+        labels = ['', '', '', '', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ["blue", "red", "red", "red", "red",
+            "red", "red", "red", "red", "red"]
+        styles = [0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0]
+        markers = [0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_const_sink_x_2_0_0.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_const_sink_x_2_0_0.set_line_label(i, labels[i])
+            self.qtgui_const_sink_x_2_0_0.set_line_width(i, widths[i])
+            self.qtgui_const_sink_x_2_0_0.set_line_color(i, colors[i])
+            self.qtgui_const_sink_x_2_0_0.set_line_style(i, styles[i])
+            self.qtgui_const_sink_x_2_0_0.set_line_marker(i, markers[i])
+            self.qtgui_const_sink_x_2_0_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_const_sink_x_2_0_0_win = sip.wrapinstance(self.qtgui_const_sink_x_2_0_0.pyqwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._qtgui_const_sink_x_2_0_0_win)
         self.qtgui_const_sink_x_2_0 = qtgui.const_sink_c(
             1024, #size
-            "", #name
-            3 #number of inputs
+            "costas output", #name
+            1 #number of inputs
         )
         self.qtgui_const_sink_x_2_0.set_update_time(0.10)
         self.qtgui_const_sink_x_2_0.set_y_axis(-2, 2)
@@ -132,7 +167,7 @@ class exemple_reception_internet(gr.top_block, Qt.QWidget):
         alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0, 1.0]
 
-        for i in range(3):
+        for i in range(1):
             if len(labels[i]) == 0:
                 self.qtgui_const_sink_x_2_0.set_line_label(i, "Data {0}".format(i))
             else:
@@ -145,30 +180,62 @@ class exemple_reception_internet(gr.top_block, Qt.QWidget):
 
         self._qtgui_const_sink_x_2_0_win = sip.wrapinstance(self.qtgui_const_sink_x_2_0.pyqwidget(), Qt.QWidget)
         self.top_grid_layout.addWidget(self._qtgui_const_sink_x_2_0_win)
-        self.digital_symbol_sync_xx_0 = digital.symbol_sync_cc(
-            digital.TED_MUELLER_AND_MULLER,
-            sps,
-            loop_bw,
-            damping_factor,
-            1.0,
-            1.5,
-            1,
-            digital.constellation_bpsk().base(),
-            digital.IR_MMSE_8TAP,
-            128,
-            [])
-        self.digital_costas_loop_cc_0 = digital.costas_loop_cc(loop_bw, 2, False)
+        self.qtgui_const_sink_x_2 = qtgui.const_sink_c(
+            1024, #size
+            "usrp output", #name
+            1 #number of inputs
+        )
+        self.qtgui_const_sink_x_2.set_update_time(0.10)
+        self.qtgui_const_sink_x_2.set_y_axis(-2, 2)
+        self.qtgui_const_sink_x_2.set_x_axis(-2, 2)
+        self.qtgui_const_sink_x_2.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, "")
+        self.qtgui_const_sink_x_2.enable_autoscale(False)
+        self.qtgui_const_sink_x_2.enable_grid(False)
+        self.qtgui_const_sink_x_2.enable_axis_labels(True)
+
+
+        labels = ['', '', '', '', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ["blue", "red", "red", "red", "red",
+            "red", "red", "red", "red", "red"]
+        styles = [0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0]
+        markers = [0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_const_sink_x_2.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_const_sink_x_2.set_line_label(i, labels[i])
+            self.qtgui_const_sink_x_2.set_line_width(i, widths[i])
+            self.qtgui_const_sink_x_2.set_line_color(i, colors[i])
+            self.qtgui_const_sink_x_2.set_line_style(i, styles[i])
+            self.qtgui_const_sink_x_2.set_line_marker(i, markers[i])
+            self.qtgui_const_sink_x_2.set_line_alpha(i, alphas[i])
+
+        self._qtgui_const_sink_x_2_win = sip.wrapinstance(self.qtgui_const_sink_x_2.pyqwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._qtgui_const_sink_x_2_win)
+        self.digital_costas_loop_cc_0 = digital.costas_loop_cc(loop_bw, 2, True)
+        self.digital_cma_equalizer_cc_0 = digital.cma_equalizer_cc(1, 1, 1, 2)
+        self._damping_factor_range = Range(0, 1, 0.1, 0.5, 200)
+        self._damping_factor_win = RangeWidget(self._damping_factor_range, self.set_damping_factor, 'damping_factor', "counter_slider", float)
+        self.top_grid_layout.addWidget(self._damping_factor_win)
 
 
 
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.digital_costas_loop_cc_0, 0), (self.qtgui_const_sink_x_2_0, 2))
-        self.connect((self.digital_symbol_sync_xx_0, 0), (self.digital_costas_loop_cc_0, 0))
-        self.connect((self.digital_symbol_sync_xx_0, 0), (self.qtgui_const_sink_x_2_0, 1))
-        self.connect((self.uhd_usrp_source_0, 0), (self.digital_symbol_sync_xx_0, 0))
-        self.connect((self.uhd_usrp_source_0, 0), (self.qtgui_const_sink_x_2_0, 0))
+        self.connect((self.digital_cma_equalizer_cc_0, 0), (self.digital_costas_loop_cc_0, 0))
+        self.connect((self.digital_cma_equalizer_cc_0, 0), (self.qtgui_const_sink_x_2_0_0, 0))
+        self.connect((self.digital_costas_loop_cc_0, 0), (self.qtgui_const_sink_x_2_0, 0))
+        self.connect((self.uhd_usrp_source_0, 0), (self.digital_cma_equalizer_cc_0, 0))
+        self.connect((self.uhd_usrp_source_0, 0), (self.qtgui_const_sink_x_2, 0))
 
     def closeEvent(self, event):
         self.settings = Qt.QSettings("GNU Radio", "exemple_reception_internet")
@@ -188,13 +255,18 @@ class exemple_reception_internet(gr.top_block, Qt.QWidget):
         self.samp_rate = samp_rate
         self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
 
+    def get_qpsk(self):
+        return self.qpsk
+
+    def set_qpsk(self, qpsk):
+        self.qpsk = qpsk
+
     def get_loop_bw(self):
         return self.loop_bw
 
     def set_loop_bw(self, loop_bw):
         self.loop_bw = loop_bw
         self.digital_costas_loop_cc_0.set_loop_bandwidth(self.loop_bw)
-        self.digital_symbol_sync_xx_0.set_loop_bandwidth(self.loop_bw)
 
     def get_gain(self):
         return self.gain
@@ -215,7 +287,12 @@ class exemple_reception_internet(gr.top_block, Qt.QWidget):
 
     def set_damping_factor(self, damping_factor):
         self.damping_factor = damping_factor
-        self.digital_symbol_sync_xx_0.set_damping_factor(self.damping_factor)
+
+    def get_bpsk(self):
+        return self.bpsk
+
+    def set_bpsk(self, bpsk):
+        self.bpsk = bpsk
 
 
 
