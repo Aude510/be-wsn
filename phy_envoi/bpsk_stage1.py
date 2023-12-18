@@ -20,15 +20,17 @@ if __name__ == '__main__':
         except:
             print("Warning: failed to XInitThreads()")
 
+from PyQt5 import Qt
+from gnuradio import qtgui
+import sip
 from gnuradio import blocks
-import numpy
+import pmt
 from gnuradio import digital
 from gnuradio import filter
 from gnuradio.filter import firdes
 from gnuradio import gr
 import sys
 import signal
-from PyQt5 import Qt
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
@@ -73,7 +75,7 @@ class bpsk_stage1(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.sps = sps = 8
+        self.sps = sps = 2
         self.loop_bw = loop_bw = 0.35
         self.samp_rate = samp_rate = 1500000
         self.rrc_taps = rrc_taps = firdes.root_raised_cosine(1, sps, 1, loop_bw, 45)
@@ -103,6 +105,50 @@ class bpsk_stage1(gr.top_block, Qt.QWidget):
         self.uhd_usrp_sink_0.set_bandwidth(samp_rate, 0)
         self.uhd_usrp_sink_0.set_samp_rate(samp_rate)
         self.uhd_usrp_sink_0.set_time_unknown_pps(uhd.time_spec())
+        self.qtgui_const_sink_x_0 = qtgui.const_sink_c(
+            1024, #size
+            "", #name
+            2 #number of inputs
+        )
+        self.qtgui_const_sink_x_0.set_update_time(0.10)
+        self.qtgui_const_sink_x_0.set_y_axis(-2, 2)
+        self.qtgui_const_sink_x_0.set_x_axis(-2, 2)
+        self.qtgui_const_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, "")
+        self.qtgui_const_sink_x_0.enable_autoscale(False)
+        self.qtgui_const_sink_x_0.enable_grid(False)
+        self.qtgui_const_sink_x_0.enable_axis_labels(True)
+
+
+        labels = ['', '', '', '', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ["blue", "red", "red", "red", "red",
+            "red", "red", "red", "red", "red"]
+        styles = [0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0]
+        markers = [0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(2):
+            if len(labels[i]) == 0:
+                self.qtgui_const_sink_x_0.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_const_sink_x_0.set_line_label(i, labels[i])
+            self.qtgui_const_sink_x_0.set_line_width(i, widths[i])
+            self.qtgui_const_sink_x_0.set_line_color(i, colors[i])
+            self.qtgui_const_sink_x_0.set_line_style(i, styles[i])
+            self.qtgui_const_sink_x_0.set_line_marker(i, markers[i])
+            self.qtgui_const_sink_x_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_const_sink_x_0_win = sip.wrapinstance(self.qtgui_const_sink_x_0.pyqwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._qtgui_const_sink_x_0_win, 0, 2, 1, 2)
+        for r in range(0, 1):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(2, 4):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self.fir_filter_xxx_0 = filter.fir_filter_ccc(1, rrc_taps)
         self.fir_filter_xxx_0.declare_sample_delay(0)
         self.digital_constellation_modulator_0 = digital.generic_mod(
@@ -114,16 +160,24 @@ class bpsk_stage1(gr.top_block, Qt.QWidget):
             verbose=False,
             log=False)
         self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
-        self.analog_random_source_x_0 = blocks.vector_source_b(list(map(int, numpy.random.randint(0, 256, 1024))), True)
+        self.blocks_pack_k_bits_bb_0 = blocks.pack_k_bits_bb(8)
+        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_char*1, '/home/jean-bap/be-wsn/debug/envoi', True, 0, 0)
+        self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
+        self.blocks_file_sink_0_0 = blocks.file_sink(gr.sizeof_char*1, '/home/jean-bap/be-wsn/debug/header', True)
+        self.blocks_file_sink_0_0.set_unbuffered(False)
 
 
 
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.analog_random_source_x_0, 0), (self.digital_constellation_modulator_0, 0))
+        self.connect((self.blocks_file_source_0, 0), (self.blocks_pack_k_bits_bb_0, 0))
+        self.connect((self.blocks_file_source_0, 0), (self.digital_constellation_modulator_0, 0))
+        self.connect((self.blocks_pack_k_bits_bb_0, 0), (self.blocks_file_sink_0_0, 0))
         self.connect((self.blocks_throttle_0, 0), (self.fir_filter_xxx_0, 0))
+        self.connect((self.blocks_throttle_0, 0), (self.qtgui_const_sink_x_0, 0))
         self.connect((self.digital_constellation_modulator_0, 0), (self.blocks_throttle_0, 0))
+        self.connect((self.fir_filter_xxx_0, 0), (self.qtgui_const_sink_x_0, 1))
         self.connect((self.fir_filter_xxx_0, 0), (self.uhd_usrp_sink_0, 0))
 
     def closeEvent(self, event):

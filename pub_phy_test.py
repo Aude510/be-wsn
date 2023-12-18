@@ -5,4 +5,4 @@ link = SendLink("5556")
 
 while True:
   link.send(b'hello')
-  time.sleep(1)
+  #time.sleep()

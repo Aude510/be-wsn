@@ -1,7 +1,6 @@
 options:
   parameters:
     author: ''
-    catch_exceptions: 'True'
     category: '[GRC Hier Blocks]'
     cmake_opt: ''
     comment: ''
@@ -69,7 +68,7 @@ blocks:
     alias: ''
     append: 'True'
     comment: ''
-    file: /home/gnuradio/5ISS-wsn/output
+    file: /home/jean-bap/be-wsn/debug/debug_cyp
     type: byte
     unbuffered: 'False'
     vlen: '1'
@@ -110,7 +109,6 @@ blocks:
     alias: ''
     bt: '0.35'
     comment: ''
-    do_unpack: 'True'
     log: 'False'
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -229,7 +227,6 @@ blocks:
     alias: ''
     comment: ''
     hwm: '-1'
-    key: ''
     maxoutbuf: '0'
     minoutbuf: '0'
     pass_tags: 'False'
@@ -253,4 +250,3 @@ connections:
 
 metadata:
   file_format: 1
-  grc_version: 3.10.5.1
