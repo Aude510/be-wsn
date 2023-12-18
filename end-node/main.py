@@ -1,6 +1,5 @@
 import threading
-import pub
-import sub
+import zmq_links
 import queue
 import Encapsulator
 import constantsMAC
@@ -16,8 +15,8 @@ def init_threads():
     threading.Thread(target=thread_add_data).start()
 
 def thread_send():
-    send_link = pub.SendLink()
-    rcv_link = sub.RecvLink()
+    send_link = zmq_links.SendLink()
+    rcv_link = zmq_links.RecvLink()
     while True:
         ##TODO timer et resend
         mutex_buff_send.acquire()
@@ -40,7 +39,6 @@ def thread_send():
 
 
 def thread_add_data():
-    
     while True:
         msg = input("Data to send ?")
         mutex_buff_send.acquire()

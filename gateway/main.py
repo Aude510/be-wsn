@@ -1,6 +1,5 @@
 import threading
-import pub
-import sub
+import zmq_links
 import queue
 import decoder
 import encoder
@@ -15,7 +14,7 @@ def init_threads():
     threading.Thread(target=thread_decode).start()
 
 def thread_reception():
-    rcv_link = sub.RecvLink()
+    rcv_link = zmq_links.RecvLink()
     while True:
         msg = rcv_link.receive()
         if len(msg) > 0:
@@ -25,16 +24,17 @@ def thread_reception():
 
 def thread_decode():
     while True:
-        send_link = pub.SendLink()
+        send_link = zmq_links.SendLink()
         mutex_buff_rcv.acquire()
         if(not(buffer_receive.empty())):
             packet = decoder.Decoder(buffer_receive.get())
             if(not(packet.src_addr() in sequence.keys())):
                 sequence[packet.src_addr()] = 0
-            if(packet.dst.addr() != constantsMAC.ADDR_GATEWAY):
+            if(packet.dst_addr() != constantsMAC.ADDR_GATEWAY):
                 mutex_buff_rcv.release()
                 continue
             if(sequence[packet.src_addr()]==packet.seq()):
+                sequence[packet.src_addr()]+=1
                 pass
                 ## TODO : faire un call API
             elif(packet.dst_addr== constantsMAC.ADDR_GATEWAY and sequence[packet.src_addr()]<packet.seq()):
