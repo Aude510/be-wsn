@@ -20,17 +20,21 @@ if __name__ == '__main__':
         except:
             print("Warning: failed to XInitThreads()")
 
+from PyQt5 import Qt
+from gnuradio import qtgui
+import sip
 from gnuradio import blocks
-import pmt
 from gnuradio import digital
-from gnuradio import gr
+from gnuradio import filter
 from gnuradio.filter import firdes
+from gnuradio import gr
 import sys
 import signal
-from PyQt5 import Qt
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
+from gnuradio import zeromq
+from gnuradio.qtgui import Range, RangeWidget
 from gnuradio import qtgui
 
 class bpsk_stage1(gr.top_block, Qt.QWidget):
@@ -69,80 +73,158 @@ class bpsk_stage1(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.variable_header_format_default_0 = variable_header_format_default_0 = digital.header_format_default(digital.packet_utils.default_access_code,0, 1)
         self.sps = sps = 2
+        self.loop_bw = loop_bw = 0.35
         self.samp_rate = samp_rate = 1500000
+        self.rrc_taps = rrc_taps = firdes.root_raised_cosine(1, sps, 1, loop_bw, 45)
+        self.qpsk = qpsk = digital.constellation_qpsk().base()
+        self.gain = gain = 30
         self.freq_centr = freq_centr = 863200000
+        self.bpsk = bpsk = digital.constellation_bpsk().base()
 
         ##################################################
         # Blocks
         ##################################################
-        self.digital_protocol_parser_b_0 = digital.protocol_parser_b("variable_header_format_default_0")
-        self.digital_packet_headergenerator_bb_default_0 = digital.packet_headergenerator_bb(3, "packet_len")
-        self.digital_header_payload_demux_0 = digital.header_payload_demux(
-            ,
-            ,
-            0,
-            "frame_len",
-            "",
-            True,
-            gr.sizeof_char,
-            "rx_time",
-            samp_rate,
-            (,),
-            0)
+        self._loop_bw_range = Range(0, 1, 0.1, 0.35, 200)
+        self._loop_bw_win = RangeWidget(self._loop_bw_range, self.set_loop_bw, 'loop_bw', "counter_slider", float)
+        self.top_grid_layout.addWidget(self._loop_bw_win)
+        self.zeromq_sub_source_0 = zeromq.sub_source(gr.sizeof_char, 1, 'tcp://127.0.0.1:5556', 100, False, -1)
+        self.qtgui_const_sink_x_0 = qtgui.const_sink_c(
+            1024, #size
+            "", #name
+            2 #number of inputs
+        )
+        self.qtgui_const_sink_x_0.set_update_time(0.10)
+        self.qtgui_const_sink_x_0.set_y_axis(-2, 2)
+        self.qtgui_const_sink_x_0.set_x_axis(-2, 2)
+        self.qtgui_const_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, "")
+        self.qtgui_const_sink_x_0.enable_autoscale(False)
+        self.qtgui_const_sink_x_0.enable_grid(False)
+        self.qtgui_const_sink_x_0.enable_axis_labels(True)
+
+
+        labels = ['', '', '', '', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ["blue", "red", "red", "red", "red",
+            "red", "red", "red", "red", "red"]
+        styles = [0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0]
+        markers = [0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(2):
+            if len(labels[i]) == 0:
+                self.qtgui_const_sink_x_0.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_const_sink_x_0.set_line_label(i, labels[i])
+            self.qtgui_const_sink_x_0.set_line_width(i, widths[i])
+            self.qtgui_const_sink_x_0.set_line_color(i, colors[i])
+            self.qtgui_const_sink_x_0.set_line_style(i, styles[i])
+            self.qtgui_const_sink_x_0.set_line_marker(i, markers[i])
+            self.qtgui_const_sink_x_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_const_sink_x_0_win = sip.wrapinstance(self.qtgui_const_sink_x_0.pyqwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._qtgui_const_sink_x_0_win, 0, 2, 1, 2)
+        for r in range(0, 1):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(2, 4):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self.fir_filter_xxx_0 = filter.fir_filter_ccc(1, rrc_taps)
+        self.fir_filter_xxx_0.declare_sample_delay(0)
+        self.digital_packet_headergenerator_bb_default_0 = digital.packet_headergenerator_bb(2, "packet_len")
+        self.digital_constellation_modulator_0 = digital.generic_mod(
+            constellation=bpsk,
+            differential=True,
+            samples_per_symbol=sps,
+            pre_diff_code=True,
+            excess_bw=loop_bw,
+            verbose=False,
+            log=False)
+        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
         self.blocks_tagged_stream_mux_0 = blocks.tagged_stream_mux(gr.sizeof_char*1, "packet_len", 0)
         self.blocks_stream_to_tagged_stream_0 = blocks.stream_to_tagged_stream(gr.sizeof_char, 1, 32, "packet_len")
-        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_char*1, '/home/aude/be-wsn/debug/envoi', True, 0, 0)
-        self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
-        self.blocks_file_sink_0_0_0 = blocks.file_sink(gr.sizeof_char*1, '/home/aude/be-wsn/debug/oskour_head', True)
-        self.blocks_file_sink_0_0_0.set_unbuffered(False)
-        self.blocks_file_sink_0_0 = blocks.file_sink(gr.sizeof_char*1, '/home/aude/be-wsn/debug/oskour', True)
+        self.blocks_file_sink_0_0 = blocks.file_sink(gr.sizeof_char*1, '/home/aude/be-wsn/debug/mux_out', True)
         self.blocks_file_sink_0_0.set_unbuffered(False)
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_char*1, '/home/aude/be-wsn/debug/debug_zmq', True)
+        self.blocks_file_sink_0.set_unbuffered(False)
 
 
 
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.digital_protocol_parser_b_0, 'info'), (self.digital_header_payload_demux_0, 'header_data'))
-        self.connect((self.blocks_file_source_0, 0), (self.blocks_stream_to_tagged_stream_0, 0))
-        self.connect((self.blocks_stream_to_tagged_stream_0, 0), (self.blocks_tagged_stream_mux_0, 1))
+        self.connect((self.blocks_stream_to_tagged_stream_0, 0), (self.blocks_tagged_stream_mux_0, 0))
         self.connect((self.blocks_stream_to_tagged_stream_0, 0), (self.digital_packet_headergenerator_bb_default_0, 0))
-        self.connect((self.blocks_tagged_stream_mux_0, 0), (self.digital_header_payload_demux_0, 0))
-        self.connect((self.blocks_tagged_stream_mux_0, 0), (self.digital_protocol_parser_b_0, 0))
-        self.connect((self.digital_header_payload_demux_0, 1), (self.blocks_file_sink_0_0, 0))
-        self.connect((self.digital_header_payload_demux_0, 0), (self.blocks_file_sink_0_0_0, 0))
-        self.connect((self.digital_packet_headergenerator_bb_default_0, 0), (self.blocks_tagged_stream_mux_0, 0))
+        self.connect((self.blocks_tagged_stream_mux_0, 0), (self.blocks_file_sink_0_0, 0))
+        self.connect((self.blocks_tagged_stream_mux_0, 0), (self.digital_constellation_modulator_0, 0))
+        self.connect((self.blocks_throttle_0, 0), (self.fir_filter_xxx_0, 0))
+        self.connect((self.blocks_throttle_0, 0), (self.qtgui_const_sink_x_0, 0))
+        self.connect((self.digital_constellation_modulator_0, 0), (self.blocks_throttle_0, 0))
+        self.connect((self.digital_packet_headergenerator_bb_default_0, 0), (self.blocks_tagged_stream_mux_0, 1))
+        self.connect((self.fir_filter_xxx_0, 0), (self.qtgui_const_sink_x_0, 1))
+        self.connect((self.zeromq_sub_source_0, 0), (self.blocks_file_sink_0, 0))
+        self.connect((self.zeromq_sub_source_0, 0), (self.blocks_stream_to_tagged_stream_0, 0))
 
     def closeEvent(self, event):
         self.settings = Qt.QSettings("GNU Radio", "bpsk_stage1")
         self.settings.setValue("geometry", self.saveGeometry())
         event.accept()
 
-    def get_variable_header_format_default_0(self):
-        return self.variable_header_format_default_0
-
-    def set_variable_header_format_default_0(self, variable_header_format_default_0):
-        self.variable_header_format_default_0 = variable_header_format_default_0
-
     def get_sps(self):
         return self.sps
 
     def set_sps(self, sps):
         self.sps = sps
+        self.set_rrc_taps(firdes.root_raised_cosine(1, self.sps, 1, self.loop_bw, 45))
+
+    def get_loop_bw(self):
+        return self.loop_bw
+
+    def set_loop_bw(self, loop_bw):
+        self.loop_bw = loop_bw
+        self.set_rrc_taps(firdes.root_raised_cosine(1, self.sps, 1, self.loop_bw, 45))
 
     def get_samp_rate(self):
         return self.samp_rate
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
+        self.blocks_throttle_0.set_sample_rate(self.samp_rate)
+
+    def get_rrc_taps(self):
+        return self.rrc_taps
+
+    def set_rrc_taps(self, rrc_taps):
+        self.rrc_taps = rrc_taps
+        self.fir_filter_xxx_0.set_taps(self.rrc_taps)
+
+    def get_qpsk(self):
+        return self.qpsk
+
+    def set_qpsk(self, qpsk):
+        self.qpsk = qpsk
+
+    def get_gain(self):
+        return self.gain
+
+    def set_gain(self, gain):
+        self.gain = gain
 
     def get_freq_centr(self):
         return self.freq_centr
 
     def set_freq_centr(self, freq_centr):
         self.freq_centr = freq_centr
+
+    def get_bpsk(self):
+        return self.bpsk
+
+    def set_bpsk(self, bpsk):
+        self.bpsk = bpsk
 
 
 

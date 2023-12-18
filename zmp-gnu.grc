@@ -68,7 +68,7 @@ blocks:
     alias: ''
     append: 'True'
     comment: ''
-    file: /home/jean-bap/be-wsn/debug/debug_cyp
+    file: /home/aude/be-wsn/debug/debug_cyp
     type: byte
     unbuffered: 'False'
     vlen: '1'
@@ -78,7 +78,7 @@ blocks:
     bus_structure: null
     coordinate: [712, 236.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: digital_gfsk_demod_0
   id: digital_gfsk_demod
   parameters:
@@ -222,7 +222,7 @@ blocks:
 - name: zeromq_sub_source_0
   id: zeromq_sub_source
   parameters:
-    address: tcp://localhost:5556
+    address: tcp://127.0.0.1:5556
     affinity: ''
     alias: ''
     comment: ''
