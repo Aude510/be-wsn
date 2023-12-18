@@ -28,5 +28,5 @@ class Decoder:
       value = self.data[5:9]
       return struct.unpack(code, value)[0]
   
-#packet = Decoder(bytes.fromhex("0069010201db0f4940f7"))
-#print('packet from', packet.src_addr(), 'to', packet.dst_addr(), 'with data', packet.value())
+packet = Decoder(bytes.fromhex("0066000102c3f548403d"))
+print('packet from', packet.src_addr(), 'to', packet.dst_addr(), 'with data', packet.value())
