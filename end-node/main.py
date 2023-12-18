@@ -5,10 +5,12 @@ import queue
 import Encapsulator
 import constantsMAC
 import encoder
+import decoder
 
 buffer_send = queue.Queue()
 mutex_buff_send = threading.Condition()
-
+seq = 0
+addr_node = 0x02
 def init_threads():
     threading.Thread(target=thread_send).start()
     threading.Thread(target=thread_add_data).start()
@@ -18,13 +20,21 @@ def thread_send():
     rcv_link = sub.RecvLink()
     while True:
         ##TODO timer et resend
+        mutex_buff_send.acquire()
+        data = buffer_send.get()
+        mutex_buff_send.release()
+        send_link.send(data)
         ack_received = False
-        while ack_received:    
-            mutex_buff_send.acquire()
-            data = buffer_send.get()
-            mutex_buff_send.release()
-            send_link.send(data)
+        while not(ack_received):    
             packet = rcv_link.receive() ##TODO tester si packet est vide ou pas
+            if(packet != None):
+                ack = decoder.Decoder(packet)
+                if(ack.dst_addr != addr_node):
+                    continue
+                if(ack.is_ack() and ack.seq() == seq):
+                    seq = seq + 1
+                    ack_received = True
+
 
 
 
@@ -41,7 +51,7 @@ def thread_add_data():
         else:
             print("Error invalid type: please enter int or float")
             continue
-        packet = encoder.Encoder(0,constantsMAC.ADDR_GATEWAY,0x01,data)
+        packet = encoder.Encoder(seq,constantsMAC.ADDR_GATEWAY,0x01,data)
         buffer_send.put(packet.bytes())
         mutex_buff_send.release()
     
