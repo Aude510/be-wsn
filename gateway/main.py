@@ -2,6 +2,7 @@ import threading
 import pub
 import sub
 import queue
+import decoder
 
 buffer_receive = queue.Queue()
 mutex_buff_rcv = threading.Condition()
@@ -23,7 +24,8 @@ def thread_decode():
     while True:
         mutex_buff_rcv.acquire()
         if(not(buffer_receive.empty())):
-            msg = buffer_receive.get()
+            packet = decoder.Decoder(buffer_receive.get())
+            
         mutex_buff_rcv.release()
 
 
