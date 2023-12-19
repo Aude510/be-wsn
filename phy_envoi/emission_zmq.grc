@@ -47,7 +47,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [291, 421]
+    coordinate: [235, 549]
     rotation: 0
     state: true
 - name: freq_centr
@@ -205,6 +205,24 @@ blocks:
     coordinate: [820, 421]
     rotation: 0
     state: enabled
+- name: blocks_file_sink_1
+  id: blocks_file_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    append: 'False'
+    comment: ''
+    file: /home/aude/be-wsn/debug/throttle
+    type: complex
+    unbuffered: 'False'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1339, 315]
+    rotation: 0
+    state: true
 - name: blocks_stream_to_tagged_stream_0
   id: blocks_stream_to_tagged_stream
   parameters:
@@ -290,7 +308,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    header_len: '2'
+    header_len: '1'
     len_tag_key: '"packet_len"'
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -864,7 +882,7 @@ blocks:
     bus_structure: null
     coordinate: [1333, 11]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: zeromq_sub_source_0
   id: zeromq_sub_source
   parameters:
@@ -900,6 +918,7 @@ connections:
 - [blocks_throttle_0, '0', qtgui_time_sink_x_0, '0']
 - [digital_constellation_modulator_0, '0', blocks_throttle_0, '0']
 - [digital_packet_headergenerator_bb_default_0, '0', blocks_tagged_stream_mux_0, '1']
+- [fir_filter_xxx_0, '0', blocks_file_sink_1, '0']
 - [fir_filter_xxx_0, '0', qtgui_const_sink_x_0, '1']
 - [fir_filter_xxx_0, '0', qtgui_freq_sink_x_0, '1']
 - [fir_filter_xxx_0, '0', qtgui_time_sink_x_0, '1']

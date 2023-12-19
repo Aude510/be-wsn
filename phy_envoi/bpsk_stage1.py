@@ -24,6 +24,7 @@ from PyQt5 import Qt
 from gnuradio import qtgui
 import sip
 from gnuradio import blocks
+import pmt
 from gnuradio import digital
 from gnuradio import filter
 from gnuradio.filter import firdes
@@ -33,7 +34,8 @@ import signal
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
-from gnuradio import zeromq
+from gnuradio import uhd
+import time
 from gnuradio.qtgui import Range, RangeWidget
 from gnuradio import qtgui
 
@@ -88,7 +90,21 @@ class bpsk_stage1(gr.top_block, Qt.QWidget):
         self._loop_bw_range = Range(0, 1, 0.1, 0.35, 200)
         self._loop_bw_win = RangeWidget(self._loop_bw_range, self.set_loop_bw, 'loop_bw', "counter_slider", float)
         self.top_grid_layout.addWidget(self._loop_bw_win)
-        self.zeromq_sub_source_0 = zeromq.sub_source(gr.sizeof_char, 1, 'tcp://127.0.0.1:5556', 100, False, -1)
+        self.uhd_usrp_sink_0 = uhd.usrp_sink(
+            ",".join(("", "")),
+            uhd.stream_args(
+                cpu_format="fc32",
+                args='',
+                channels=list(range(0,1)),
+            ),
+            '',
+        )
+        self.uhd_usrp_sink_0.set_center_freq(freq_centr, 0)
+        self.uhd_usrp_sink_0.set_gain(gain, 0)
+        self.uhd_usrp_sink_0.set_antenna('TX/RX', 0)
+        self.uhd_usrp_sink_0.set_bandwidth(samp_rate, 0)
+        self.uhd_usrp_sink_0.set_samp_rate(samp_rate)
+        self.uhd_usrp_sink_0.set_time_unknown_pps(uhd.time_spec())
         self.qtgui_const_sink_x_0 = qtgui.const_sink_c(
             1024, #size
             "", #name
@@ -135,7 +151,7 @@ class bpsk_stage1(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setColumnStretch(c, 1)
         self.fir_filter_xxx_0 = filter.fir_filter_ccc(1, rrc_taps)
         self.fir_filter_xxx_0.declare_sample_delay(0)
-        self.digital_packet_headergenerator_bb_default_0 = digital.packet_headergenerator_bb(2, "packet_len")
+        self.digital_packet_headergenerator_bb_default_0 = digital.packet_headergenerator_bb(6, "packet_len")
         self.digital_constellation_modulator_0 = digital.generic_mod(
             constellation=bpsk,
             differential=True,
@@ -147,27 +163,24 @@ class bpsk_stage1(gr.top_block, Qt.QWidget):
         self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
         self.blocks_tagged_stream_mux_0 = blocks.tagged_stream_mux(gr.sizeof_char*1, "packet_len", 0)
         self.blocks_stream_to_tagged_stream_0 = blocks.stream_to_tagged_stream(gr.sizeof_char, 1, 32, "packet_len")
-        self.blocks_file_sink_0_0 = blocks.file_sink(gr.sizeof_char*1, '/home/aude/be-wsn/debug/mux_out', True)
-        self.blocks_file_sink_0_0.set_unbuffered(False)
-        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_char*1, '/home/aude/be-wsn/debug/debug_zmq', True)
-        self.blocks_file_sink_0.set_unbuffered(False)
+        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_char*1, '/home/aude/be-wsn/debug/envoi', True, 0, 0)
+        self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
 
 
 
         ##################################################
         # Connections
         ##################################################
+        self.connect((self.blocks_file_source_0, 0), (self.blocks_stream_to_tagged_stream_0, 0))
         self.connect((self.blocks_stream_to_tagged_stream_0, 0), (self.blocks_tagged_stream_mux_0, 0))
         self.connect((self.blocks_stream_to_tagged_stream_0, 0), (self.digital_packet_headergenerator_bb_default_0, 0))
-        self.connect((self.blocks_tagged_stream_mux_0, 0), (self.blocks_file_sink_0_0, 0))
         self.connect((self.blocks_tagged_stream_mux_0, 0), (self.digital_constellation_modulator_0, 0))
         self.connect((self.blocks_throttle_0, 0), (self.fir_filter_xxx_0, 0))
         self.connect((self.blocks_throttle_0, 0), (self.qtgui_const_sink_x_0, 0))
         self.connect((self.digital_constellation_modulator_0, 0), (self.blocks_throttle_0, 0))
         self.connect((self.digital_packet_headergenerator_bb_default_0, 0), (self.blocks_tagged_stream_mux_0, 1))
         self.connect((self.fir_filter_xxx_0, 0), (self.qtgui_const_sink_x_0, 1))
-        self.connect((self.zeromq_sub_source_0, 0), (self.blocks_file_sink_0, 0))
-        self.connect((self.zeromq_sub_source_0, 0), (self.blocks_stream_to_tagged_stream_0, 0))
+        self.connect((self.fir_filter_xxx_0, 0), (self.uhd_usrp_sink_0, 0))
 
     def closeEvent(self, event):
         self.settings = Qt.QSettings("GNU Radio", "bpsk_stage1")
@@ -194,6 +207,8 @@ class bpsk_stage1(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.blocks_throttle_0.set_sample_rate(self.samp_rate)
+        self.uhd_usrp_sink_0.set_samp_rate(self.samp_rate)
+        self.uhd_usrp_sink_0.set_bandwidth(self.samp_rate, 0)
 
     def get_rrc_taps(self):
         return self.rrc_taps
@@ -213,12 +228,14 @@ class bpsk_stage1(gr.top_block, Qt.QWidget):
 
     def set_gain(self, gain):
         self.gain = gain
+        self.uhd_usrp_sink_0.set_gain(self.gain, 0)
 
     def get_freq_centr(self):
         return self.freq_centr
 
     def set_freq_centr(self, freq_centr):
         self.freq_centr = freq_centr
+        self.uhd_usrp_sink_0.set_center_freq(self.freq_centr, 0)
 
     def get_bpsk(self):
         return self.bpsk
