@@ -101,6 +101,46 @@ class exemple_reception_internet(gr.top_block, Qt.QWidget):
         self.uhd_usrp_source_0.set_antenna('TX/RX', 0)
         self.uhd_usrp_source_0.set_samp_rate(samp_rate)
         self.uhd_usrp_source_0.set_time_unknown_pps(uhd.time_spec())
+        self.qtgui_const_sink_x_2_0_0 = qtgui.const_sink_c(
+            1024, #size
+            "cma output", #name
+            1 #number of inputs
+        )
+        self.qtgui_const_sink_x_2_0_0.set_update_time(0.10)
+        self.qtgui_const_sink_x_2_0_0.set_y_axis(-2, 2)
+        self.qtgui_const_sink_x_2_0_0.set_x_axis(-2, 2)
+        self.qtgui_const_sink_x_2_0_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, "")
+        self.qtgui_const_sink_x_2_0_0.enable_autoscale(False)
+        self.qtgui_const_sink_x_2_0_0.enable_grid(False)
+        self.qtgui_const_sink_x_2_0_0.enable_axis_labels(True)
+
+
+        labels = ['', '', '', '', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ["blue", "red", "red", "red", "red",
+            "red", "red", "red", "red", "red"]
+        styles = [0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0]
+        markers = [0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_const_sink_x_2_0_0.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_const_sink_x_2_0_0.set_line_label(i, labels[i])
+            self.qtgui_const_sink_x_2_0_0.set_line_width(i, widths[i])
+            self.qtgui_const_sink_x_2_0_0.set_line_color(i, colors[i])
+            self.qtgui_const_sink_x_2_0_0.set_line_style(i, styles[i])
+            self.qtgui_const_sink_x_2_0_0.set_line_marker(i, markers[i])
+            self.qtgui_const_sink_x_2_0_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_const_sink_x_2_0_0_win = sip.wrapinstance(self.qtgui_const_sink_x_2_0_0.pyqwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._qtgui_const_sink_x_2_0_0_win)
         self.qtgui_const_sink_x_2_0 = qtgui.const_sink_c(
             1024, #size
             "costas output", #name
@@ -141,6 +181,46 @@ class exemple_reception_internet(gr.top_block, Qt.QWidget):
 
         self._qtgui_const_sink_x_2_0_win = sip.wrapinstance(self.qtgui_const_sink_x_2_0.pyqwidget(), Qt.QWidget)
         self.top_grid_layout.addWidget(self._qtgui_const_sink_x_2_0_win)
+        self.qtgui_const_sink_x_2 = qtgui.const_sink_c(
+            1024, #size
+            "usrp output", #name
+            1 #number of inputs
+        )
+        self.qtgui_const_sink_x_2.set_update_time(0.10)
+        self.qtgui_const_sink_x_2.set_y_axis(-2, 2)
+        self.qtgui_const_sink_x_2.set_x_axis(-2, 2)
+        self.qtgui_const_sink_x_2.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, "")
+        self.qtgui_const_sink_x_2.enable_autoscale(False)
+        self.qtgui_const_sink_x_2.enable_grid(False)
+        self.qtgui_const_sink_x_2.enable_axis_labels(True)
+
+
+        labels = ['', '', '', '', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ["blue", "red", "red", "red", "red",
+            "red", "red", "red", "red", "red"]
+        styles = [0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0]
+        markers = [0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_const_sink_x_2.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_const_sink_x_2.set_line_label(i, labels[i])
+            self.qtgui_const_sink_x_2.set_line_width(i, widths[i])
+            self.qtgui_const_sink_x_2.set_line_color(i, colors[i])
+            self.qtgui_const_sink_x_2.set_line_style(i, styles[i])
+            self.qtgui_const_sink_x_2.set_line_marker(i, markers[i])
+            self.qtgui_const_sink_x_2.set_line_alpha(i, alphas[i])
+
+        self._qtgui_const_sink_x_2_win = sip.wrapinstance(self.qtgui_const_sink_x_2.pyqwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._qtgui_const_sink_x_2_win)
         self.digital_costas_loop_cc_0 = digital.costas_loop_cc(loop_bw, 2, True)
         self.digital_constellation_decoder_cb_0 = digital.constellation_decoder_cb(bpsk)
         self.digital_cma_equalizer_cc_0 = digital.cma_equalizer_cc(1, 1, 1, 2)
@@ -148,7 +228,7 @@ class exemple_reception_internet(gr.top_block, Qt.QWidget):
         self._damping_factor_win = RangeWidget(self._damping_factor_range, self.set_damping_factor, 'damping_factor', "counter_slider", float)
         self.top_grid_layout.addWidget(self._damping_factor_win)
         self.blocks_pack_k_bits_bb_0 = blocks.pack_k_bits_bb(8)
-        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_char*1, '/home/aude/be-wsn/debug/reception', False)
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_char*1, '/home/jean-bap/be-wsn/debug/reception', False)
         self.blocks_file_sink_0.set_unbuffered(False)
 
 
@@ -158,10 +238,12 @@ class exemple_reception_internet(gr.top_block, Qt.QWidget):
         ##################################################
         self.connect((self.blocks_pack_k_bits_bb_0, 0), (self.blocks_file_sink_0, 0))
         self.connect((self.digital_cma_equalizer_cc_0, 0), (self.digital_costas_loop_cc_0, 0))
+        self.connect((self.digital_cma_equalizer_cc_0, 0), (self.qtgui_const_sink_x_2_0_0, 0))
         self.connect((self.digital_constellation_decoder_cb_0, 0), (self.blocks_pack_k_bits_bb_0, 0))
         self.connect((self.digital_costas_loop_cc_0, 0), (self.digital_constellation_decoder_cb_0, 0))
         self.connect((self.digital_costas_loop_cc_0, 0), (self.qtgui_const_sink_x_2_0, 0))
         self.connect((self.uhd_usrp_source_0, 0), (self.digital_cma_equalizer_cc_0, 0))
+        self.connect((self.uhd_usrp_source_0, 0), (self.qtgui_const_sink_x_2, 0))
 
     def closeEvent(self, event):
         self.settings = Qt.QSettings("GNU Radio", "exemple_reception_internet")

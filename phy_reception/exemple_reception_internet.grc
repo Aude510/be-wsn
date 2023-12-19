@@ -199,7 +199,7 @@ blocks:
     alias: ''
     append: 'False'
     comment: ''
-    file: /home/aude/be-wsn/debug/reception
+    file: /home/jean-bap/be-wsn/debug/reception
     type: byte
     unbuffered: 'False'
     vlen: '1'
@@ -448,7 +448,7 @@ blocks:
     bus_structure: null
     coordinate: [1369, 206]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_const_sink_x_2_0
   id: qtgui_const_sink_x
   parameters:
@@ -632,7 +632,7 @@ blocks:
     bus_structure: null
     coordinate: [849, 475]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_time_sink_x_0
   id: qtgui_time_sink_x
   parameters:
