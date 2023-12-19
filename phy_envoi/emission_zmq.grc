@@ -176,7 +176,7 @@ blocks:
     alias: ''
     append: 'True'
     comment: ''
-    file: /home/jean-bap/be-wsn/debug/debug_zmq
+    file: /home/aude/be-wsn/debug/debug_zmq
     type: byte
     unbuffered: 'False'
     vlen: '1'
@@ -184,31 +184,27 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [450, 432]
+    coordinate: [470, 464]
     rotation: 0
-    state: disabled
-- name: blocks_file_source_0
-  id: blocks_file_source
+    state: enabled
+- name: blocks_file_sink_0_0
+  id: blocks_file_sink
   parameters:
     affinity: ''
     alias: ''
-    begin_tag: pmt.PMT_NIL
+    append: 'True'
     comment: ''
-    file: /home/jean-bap/be-wsn/debug/envoi
-    length: '0'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    offset: '0'
-    repeat: 'True'
+    file: /home/aude/be-wsn/debug/mux_out
     type: byte
+    unbuffered: 'False'
     vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [8, 261]
+    coordinate: [820, 421]
     rotation: 0
-    state: true
+    state: enabled
 - name: blocks_stream_to_tagged_stream_0
   id: blocks_stream_to_tagged_stream
   parameters:
@@ -866,13 +862,13 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1295, 20]
+    coordinate: [1333, 11]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: zeromq_sub_source_0
   id: zeromq_sub_source
   parameters:
-    address: tcp://localhost:5556
+    address: tcp://127.0.0.1:5556
     affinity: ''
     alias: ''
     comment: ''
@@ -889,14 +885,14 @@ blocks:
     bus_structure: null
     coordinate: [7, 231]
     rotation: 0
-    state: disabled
+    state: enabled
 
 connections:
 - [analog_random_source_x_0, '0', digital_constellation_modulator_0, '0']
-- [blocks_file_source_0, '0', blocks_stream_to_tagged_stream_0, '0']
 - [blocks_stream_to_tagged_stream_0, '0', blocks_tagged_stream_mux_0, '0']
 - [blocks_stream_to_tagged_stream_0, '0', digital_packet_headergenerator_bb_default_0,
   '0']
+- [blocks_tagged_stream_mux_0, '0', blocks_file_sink_0_0, '0']
 - [blocks_tagged_stream_mux_0, '0', digital_constellation_modulator_0, '0']
 - [blocks_throttle_0, '0', fir_filter_xxx_0, '0']
 - [blocks_throttle_0, '0', qtgui_const_sink_x_0, '0']
@@ -909,7 +905,7 @@ connections:
 - [fir_filter_xxx_0, '0', qtgui_time_sink_x_0, '1']
 - [fir_filter_xxx_0, '0', uhd_usrp_sink_0, '0']
 - [zeromq_sub_source_0, '0', blocks_file_sink_0, '0']
-- [zeromq_sub_source_0, '0', digital_constellation_modulator_0, '0']
+- [zeromq_sub_source_0, '0', blocks_stream_to_tagged_stream_0, '0']
 
 metadata:
   file_format: 1
