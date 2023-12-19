@@ -194,7 +194,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: /home/jean-bap/be-wsn/debug/envoi
+    file: /home/aude/be-wsn/debug/envoi
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -294,7 +294,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    header_len: '2'
+    header_len: '6'
     len_tag_key: '"packet_len"'
     maxoutbuf: '0'
     minoutbuf: '0'

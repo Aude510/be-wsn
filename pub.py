@@ -17,4 +17,4 @@ while True:
     messagedata = random.randrange(1,215) - 80
     print(topic, messagedata)
     socket.send_string("%d %d" % (topic, messagedata))
-    time.sleep(1)
+    #time.sleep(1)
