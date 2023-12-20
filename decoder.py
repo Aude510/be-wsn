@@ -8,7 +8,10 @@ class Decoder:
   def __init__(self, data: bytes):
     self.data = data
     calculator = Calculator(Crc8.CCITT)
-    assert calculator.checksum(data[0:9]) == data[9]
+    if data[1] != 0:
+      assert calculator.checksum(data[0:9]) == data[9]
+    else:
+      assert calculator.checksum(data[0:5]) == data[5]
 
   def is_ack(self):
     return self.data[1] == 0
@@ -27,6 +30,6 @@ class Decoder:
     if code != 0:
       value = self.data[5:9]
       return struct.unpack(code, value)[0]
-  
-packet = Decoder(bytes.fromhex("0066000102c3f548403d"))
-print('packet from', packet.src_addr(), 'to', packet.dst_addr(), 'with data', packet.value())
+
+# packet = Decoder(bytes.fromhex("0066000102c3f548403d"))
+# print('packet from', packet.src_addr(), 'to', packet.dst_addr(), 'with data', packet.value())

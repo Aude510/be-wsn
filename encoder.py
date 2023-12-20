@@ -23,11 +23,11 @@ class Encoder:
   def bytes(self):
     return self.data
 
-packet = Encoder(0, 1, 2, 3.14)
-print(packet.bytes().hex())
+#packet = Encoder(0, 1, 2, 3.14)
+#print(packet.bytes().hex())
 
-packet = Encoder(0, 1, 2, 0, True)
-print(packet.bytes().hex())
+# packet = Encoder(0, 1, 2, 0, True)
+# print(packet.bytes().hex())
   
   
 #packet = Decoder(bytes.fromhex("0069010201db0f4940f7"))
