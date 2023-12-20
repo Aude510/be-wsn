@@ -28,8 +28,8 @@ def thread_reception():
             mutex_buff_rcv.release()
 
 def thread_decode():
-    send_link = zmq_links.SendLink("5558")
     while True:
+        send_link = zmq_links.SendLink("5558")
         mutex_buff_rcv.acquire()
         if(not(buffer_receive.empty())):
             packet = decoder.Decoder(buffer_receive.get())
