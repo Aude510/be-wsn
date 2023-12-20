@@ -25,6 +25,9 @@ class Decoder:
   def seq(self):
     return self.data[2]
   
+  def code(self):
+    return self.data[1]
+  
   def value(self):
     code = chr(self.data[1])
     if code != 0:
