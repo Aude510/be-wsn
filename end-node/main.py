@@ -13,14 +13,12 @@ buffer_send = queue.Queue()
 mutex_buff_send = threading.Condition()
 addr_node = 0x02
 
-
 def init_threads():
     threading.Thread(target=thread_send).start()
     threading.Thread(target=thread_add_data).start()
 
 def thread_send():
     seq = 0
-    max_retransmit = 15
     send_link = zmq_links.SendLink("5557")
     rcv_link = zmq_links.RecvLink("5558")
     while True:
@@ -35,21 +33,19 @@ def thread_send():
         sendPacket = encoder.Encoder(seq, constantsMAC.ADDR_GATEWAY, addr_node, data)
         send_link.send(sendPacket.bytes())
         ack_received = False
-        nb_retransmit = 0
-        while not ack_received or nb_retransmit < max_retransmit:    
+        while not ack_received:    
             packet = rcv_link.receive() ##TODO tester si packet est vide ou pas
             if(packet != None):
                 ack = decoder.Decoder(packet)
                 if(ack.dst_addr() != addr_node):
-                    nb_retransmit+=1
                     continue
                 if(ack.is_ack() and ack.seq() == seq):
                     seq += 1
                     ack_received = True
-                nb_retransmit += 1
 
 
 def thread_add_data():
+    global seq
     while True:
         msg = input("Data to send ? ")
         if(isInt(msg)):
