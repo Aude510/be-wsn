@@ -75,7 +75,6 @@ class exemple_reception_internet(gr.top_block, Qt.QWidget):
         ##################################################
         self.sps = sps = 2
         self.samp_rate = samp_rate = 1500000
-        self.qpsk = qpsk = digital.constellation_qpsk().base()
         self.loop_bw = loop_bw = 0.35
         self.gain = gain = 30
         self.freq_centr = freq_centr = 863200000
@@ -262,12 +261,6 @@ class exemple_reception_internet(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
-
-    def get_qpsk(self):
-        return self.qpsk
-
-    def set_qpsk(self, qpsk):
-        self.qpsk = qpsk
 
     def get_loop_bw(self):
         return self.loop_bw
