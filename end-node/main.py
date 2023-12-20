@@ -19,6 +19,7 @@ def init_threads():
 
 def thread_send():
     seq = 0
+    max_retrans = 10
     send_link = zmq_links.SendLink("5557")
     rcv_link = zmq_links.RecvLink("5558")
     while True:
@@ -33,15 +34,15 @@ def thread_send():
         sendPacket = encoder.Encoder(seq, constantsMAC.ADDR_GATEWAY, addr_node, data)
         send_link.send(sendPacket.bytes())
         ack_received = False
-        while not ack_received:    
+        nb_retrans = 0
+        while not ack_received and nb_retrans<max_retrans:    
             packet = rcv_link.receive() ##TODO tester si packet est vide ou pas
             if(packet != None):
                 ack = decoder.Decoder(packet)
-                if(ack.dst_addr() != addr_node):
-                    continue
-                if(ack.is_ack() and ack.seq() == seq):
+                if(ack.is_ack() and ack.seq() == seq and ack.dst_addr() == addr_node):
                     seq += 1
                     ack_received = True
+            nb_retrans += 1
 
 
 def thread_add_data():

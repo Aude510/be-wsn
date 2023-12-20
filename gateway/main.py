@@ -8,6 +8,7 @@ import queue
 import decoder
 import encoder
 import constantsMAC
+import requests
 
 buffer_receive = queue.Queue()
 mutex_buff_rcv = threading.Condition()
@@ -39,13 +40,26 @@ def thread_decode():
                 continue
             if(sequence[packet.src_addr()]==packet.seq()):
                 sequence[packet.src_addr()]+=1
-                print("La valeur dans le paquet est : " + str(packet.value()))
-                ## TODO : faire un call API
+                if(packet.code() == constantsMAC.CODE_DATA_INT):
+                    requests.post('https://api.is-grandma-alive.obrulez.fr/mamie-debout',json={"debout":str(packet.value())})
+                    print("Call API mamie-debout, value : " + str(packet.value()))
+                elif(packet.code() == constantsMAC.CODE_DATA_FLOAT):
+                    requests.post('https://api.is-grandma-alive.obrulez.fr/mamie-asphyxie',json={"asphyxie":str(packet.value())})
+                    print("Call API mamie-asphyxie, value : " + str(packet.value()))
+                else:
+                    print("Code received not recognized")
             elif(packet.dst_addr == constantsMAC.ADDR_GATEWAY and sequence[packet.src_addr()]<packet.seq()):
                 sequence[packet.src_addr()] = packet.seq()
                 print("Numéro de séquence de futur")
                 print("La valeur dans le paquet est : " + str(packet.value()))
-                ## TODO faire aussi un call API
+                if(packet.code() == constantsMAC.CODE_DATA_INT):
+                    requests.post('https://api.is-grandma-alive.obrulez.fr/mamie-debout',json={"debout":str(packet.value())})
+                    print("Call API mamie-debout, value : " + str(packet.value()))
+                elif(packet.code() == constantsMAC.CODE_DATA_FLOAT):
+                    requests.post('https://api.is-grandma-alive.obrulez.fr/mamie-asphyxie',json={"asphyxie":str(packet.value())})
+                    print("Call API mamie-asphyxie, value : " + str(packet.value()))
+                else:
+                    print("Code received not recognized")
             ack = encoder.Encoder(packet.seq(), packet.src_addr(), packet.dst_addr(), None, True).bytes()
             dec_ack = decoder.Decoder(ack)
             send_link.send(ack)                
