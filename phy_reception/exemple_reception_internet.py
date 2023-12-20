@@ -74,7 +74,7 @@ class exemple_reception_internet(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.sps = sps = 2
-        self.samp_rate = samp_rate = 1500000
+        self.samp_rate = samp_rate = 3500000
         self.qpsk = qpsk = digital.constellation_qpsk().base()
         self.loop_bw = loop_bw = 0.35
         self.gain = gain = 30
