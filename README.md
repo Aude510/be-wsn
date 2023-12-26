@@ -1,5 +1,6 @@
 # Wireless Sensor Network
-Onnig Brulez, Arthur Gautheron, Cyprien Heusse, Emily Holmes, Aude Jean-Baptiste, Romain Moulin, Marco Ribeiro-Badejo
+Authors: Onnig Brulez, Arthur Gautheron, Cyprien Heusse, Emily Holmes, Aude Jean-Baptiste, Romain Moulin, Marco Ribeiro-Badejo.
+
 Realised as part of the 5ISS Wireless Sensor Network course at INSA Toulouse
 
 ## Deliverables
